@@ -4,7 +4,7 @@ import { handleAuthentication } from '../actions'
 
 class GoogleAuth extends React.Component {
 
-    auth = null
+    auth = null;
 
     componentDidMount() {
         window.gapi.load('client:auth2', () => {
@@ -23,34 +23,71 @@ class GoogleAuth extends React.Component {
     }
 
     onHandleAuthentication() {
-        this.props.isSignedIn ? this.auth.signOut() : this.auth.signIn();
+        this.props.authStatus.isSignedIn ? this.auth.signOut() : this.auth.signIn();// this will trigger onAuthChange()
     }
 
     onAuthChange = () => {
-        const authStatus = {
+        let authStatus = {
             isSignedIn: this.auth.isSignedIn.get(),
-        }
-        authStatus.userId = authStatus.isSignedIn ? this.auth.currentUser.get().getId() : null; //if user logged out, return null
+            userInfo: null
+        };
+
+        if (authStatus.isSignedIn) {
+            authStatus.userInfo = this.getUserDetails();
+        } else
+            authStatus.userInfo = null;
 
         this.props.handleAuthentication(authStatus);
     }
 
+    getUserDetails() {
+        return {
+            userId: this.auth.currentUser.get().getId(),
+            userName: this.auth.currentUser.get().getBasicProfile().getName(),
+            userEmail: this.auth.currentUser.get().getBasicProfile().getEmail(),
+            userImageUrl: this.auth.currentUser.get().getBasicProfile().getImageUrl()
+        };
+    }
+
+    renderButton() {
+        let button;
+        const isSignedIn = this.props.authStatus.isSignedIn;
+
+        if (isSignedIn == null) {
+            button =
+                <button className="ui loading button">  Loading  </button>
+        } else if (isSignedIn) {
+            button =
+                <div>
+                    <button
+                        className="ui google plus button"
+                        onClick={() => this.onHandleAuthentication()}>
+                        <i className="google icon" />
+                                Sign out
+                    </button>
+
+                    <div style={{ position: "absolute", backgroundColor: 'white', display: 'none' }}>
+                        {/* TODO: PUT PROFILE INFO HERE */}
+                    </div>
+                </div>
+        } else {
+            button =
+                <button
+                    className="ui google plus button"
+                    onClick={() => this.onHandleAuthentication()}>
+                    <i className="google icon" />
+                    Sign in
+                </button >
+        }
+
+        return button;
+    }
+
     render() {
         return (
-            <div style={{ marginTop: "1px" }}>
+            <div style={{ marginTop: '1px' }}>
                 {
-                    this.props.isSignedIn === null ?
-                        <button
-                            className="ui loading google plus button">
-                            Loading
-                            </button>
-                        :
-                        <button
-                            className="ui google plus button"
-                            onClick={() => this.onHandleAuthentication()}>
-                            <i className="google icon"></i>
-                            {this.props.isSignedIn ? "Sign out" : "Sign in"}
-                        </button>
+                    this.renderButton()
                 }
             </div>
         )
@@ -58,7 +95,7 @@ class GoogleAuth extends React.Component {
 };
 
 const mapStateToProps = state => {
-    return { isSignedIn: state.authStatus.isSignedIn };
+    return { authStatus: state.authStatus };
 };
 
 export default connect(mapStateToProps, { handleAuthentication })(GoogleAuth);

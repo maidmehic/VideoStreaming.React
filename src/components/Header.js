@@ -11,10 +11,10 @@ export class Header extends React.Component {
                     <Link to="/" className="item">
                         Streamy
                     </Link>
+                    <Link to="/streams/new" className="item">
+                        Add Stream
+                    </Link>
                     <div className="right menu">
-                        <Link to="/" className="item">
-                            All Streams
-                        </Link>
                         <GoogleAuth />
                     </div>
                 </div>

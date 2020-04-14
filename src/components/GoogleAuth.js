@@ -1,10 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { handleAuthentication } from '../actions'
+import "../style/GoogleAuth.css"
 
 class GoogleAuth extends React.Component {
 
     auth = null;
+    state = { displayPopup: false }
 
     componentDidMount() {
         window.gapi.load('client:auth2', () => {
@@ -22,8 +24,12 @@ class GoogleAuth extends React.Component {
         });
     }
 
-    onHandleAuthentication() {
-        this.props.authStatus.isSignedIn ? this.auth.signOut() : this.auth.signIn();// this will trigger onAuthChange()
+    onHandleAuthentication() {// this will trigger onAuthChange()
+        if (this.props.authStatus.isSignedIn) {
+            this.auth.signOut()
+            this.togglePopup()
+        } else
+            this.auth.signIn();
     }
 
     onAuthChange = () => {
@@ -49,25 +55,29 @@ class GoogleAuth extends React.Component {
         };
     }
 
+    togglePopup() {
+        this.setState({ displayPopup: !this.state.displayPopup });
+    }
+
     renderButton() {
         let button;
-        const isSignedIn = this.props.authStatus.isSignedIn;
+        const { isSignedIn } = this.props.authStatus;
 
         if (isSignedIn == null) {
-            button =
-                <button className="ui loading button">  Loading  </button>
+            button = <button className="ui loading button">  Loading  </button>
         } else if (isSignedIn) {
             button =
-                <div>
-                    <button
-                        className="ui google plus button"
-                        onClick={() => this.onHandleAuthentication()}>
-                        <i className="google icon" />
-                                Sign out
-                    </button>
-
-                    <div style={{ position: "absolute", backgroundColor: 'white', display: 'none' }}>
-                        {/* TODO: PUT PROFILE INFO HERE */}
+                <div style={{ marginTop: "3px", outline: "none" }}
+                    tabIndex="1"
+                    onFocus={() => this.togglePopup()}
+                    onBlur={() => this.togglePopup()}>
+                    <img
+                        alt="profile_photo"
+                        src={this.props.authStatus.userInfo.userImageUrl}
+                        style={{ borderRadius: "50px", width: "30px" }}
+                    />
+                    <div style={this.state.displayPopup ? { display: "block" } : { display: "none" }} >
+                        {this.renderPopup()}
                     </div>
                 </div>
         } else {
@@ -81,6 +91,24 @@ class GoogleAuth extends React.Component {
         }
 
         return button;
+    }
+
+    renderPopup() {
+        const { userName, userEmail, userImageUrl } = this.props.authStatus.userInfo;
+        return (
+            <div className="popup">
+                <img alt="profile_photo" src={userImageUrl} />
+                <span style={{ fontSize: "initial" }}>{userName}</span>
+                <span style={{ color: "grey" }}>{userEmail}</span>
+                <div
+                    style={{ marginTop: "10px", width: "100%", marginLeft: "3px" }}
+                    className="ui google plus button"
+                    onClick={() => this.onHandleAuthentication()}>
+                    <i className="google icon" />
+                    Sign out
+                </div >
+            </div >
+        );
     }
 
     render() {

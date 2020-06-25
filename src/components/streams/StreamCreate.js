@@ -35,7 +35,7 @@ class StreamCreate extends React.Component {
         }
     }
 
-    onSubmit = (formValues) => {//handleSubmit wont get called if there are validation errors
+    onSubmit = (formValues) => {//handleSubmit won't get called if there are validation errors
         this.props.createStream(formValues);
     }
 

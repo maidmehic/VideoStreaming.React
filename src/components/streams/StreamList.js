@@ -1,9 +1,12 @@
 import React from 'react';
 
-const StreamList = () => {
-    return (
-        <div>StreamList</div>
-    );
+class StreamList extends React.Component {
+
+    render() {
+        return (
+            <div>StreamList</div>
+        );
+    }
 };
 
 export default StreamList;

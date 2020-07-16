@@ -86,7 +86,7 @@ class GoogleAuth extends React.Component {
                     className="ui google plus button"
                     onClick={() => this.onHandleAuthentication()}>
                     <i className="google icon" />
-                    Sign in
+                    Sign in with Google
                 </button >
         }
 
